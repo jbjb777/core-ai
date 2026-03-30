@@ -22,7 +22,7 @@
     overflow: hidden;
   }
 
-  /* Sidebar iframe */
+  /* Sidebar iframe — 데스크탑: flex 나란히 */
   .sidebar-frame {
     width: 260px;
     min-width: 0;
@@ -39,6 +39,11 @@
     opacity: 0;
   }
 
+  /* 딤 오버레이 (모바일 전용) */
+  .sidebar-dim {
+    display: none;
+  }
+
   /* Main area */
   .main-area {
     flex: 1;
@@ -46,6 +51,43 @@
     flex-direction: column;
     overflow: hidden;
     min-width: 0;
+  }
+
+  /* 모바일: 사이드바를 fixed 오버레이로 */
+  @media (max-width: 768px) {
+    .sidebar-frame {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 100%;
+      height: 100dvh;
+      z-index: 200;
+      transition: transform 0.32s cubic-bezier(0.4,0,0.2,1),
+                  opacity 0.28s cubic-bezier(0.4,0,0.2,1);
+      transform: translateX(0);
+      opacity: 1;
+    }
+    .sidebar-frame.collapsed {
+      transform: translateX(-100%);
+      width: 260px;
+      opacity: 0;
+    }
+    .sidebar-dim {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 199;
+      opacity: 1;
+      transition: opacity 0.28s ease;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+    .sidebar-dim.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
   }
 
   /* Top Nav */
@@ -403,7 +445,8 @@
 </head>
 <body>
 
-<iframe class="sidebar-frame" src="side.html"></iframe>
+<div class="sidebar-dim hidden" id="sidebar-dim" onclick="closeSidebarMobile()"></div>
+<iframe class="sidebar-frame" id="sidebar-frame" src="side.html"></iframe>
 
 <div class="main-area">
 
@@ -526,18 +569,51 @@ const suggestions = [
   '관련 분야의 새로운 아이디어 제안'
 ];
 
+const isMobile = () => window.innerWidth <= 768;
+
+function setSidebarState(open) {
+  const frame = document.getElementById('sidebar-frame');
+  const dim = document.getElementById('sidebar-dim');
+  const bar2 = document.getElementById('bar2');
+  if (open) {
+    frame.classList.remove('collapsed');
+    if (isMobile()) dim.classList.remove('hidden');
+  } else {
+    frame.classList.add('collapsed');
+    dim.classList.add('hidden');
+  }
+  bar2.style.width = open ? '10px' : '14px';
+}
+
 function toggleSidebar(btn) {
-  const frame = document.querySelector('.sidebar-frame');
-  const collapsed = frame.classList.toggle('collapsed');
+  const frame = document.getElementById('sidebar-frame');
+  const open = frame.classList.contains('collapsed');
+  setSidebarState(open);
   btn.style.transition = 'transform 0s';
   btn.style.transform = 'scale(0.78)';
   setTimeout(() => {
     btn.style.transition = 'transform 0.35s cubic-bezier(0.34,1.72,0.64,1)';
     btn.style.transform = 'scale(1)';
   }, 60);
-  const bar2 = document.getElementById('bar2');
-  bar2.style.width = collapsed ? '14px' : '10px';
 }
+
+function closeSidebarMobile() {
+  setSidebarState(false);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  setSidebarState(!isMobile());
+});
+
+window.addEventListener('resize', () => {
+  const dim = document.getElementById('sidebar-dim');
+  const frame = document.getElementById('sidebar-frame');
+  if (!isMobile()) {
+    dim.classList.add('hidden');
+  } else if (!frame.classList.contains('collapsed')) {
+    dim.classList.remove('hidden');
+  }
+});
 
 function bounce(el) {
   el.style.transition = 'transform 0.0s';
