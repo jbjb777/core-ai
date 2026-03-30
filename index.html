@@ -25,10 +25,18 @@
   /* Sidebar iframe */
   .sidebar-frame {
     width: 260px;
-    min-width: 260px;
+    min-width: 0;
     height: 100%;
     border: none;
     flex-shrink: 0;
+    transition: width 0.32s cubic-bezier(0.4,0,0.2,1),
+                opacity 0.28s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+    opacity: 1;
+  }
+  .sidebar-frame.collapsed {
+    width: 0;
+    opacity: 0;
   }
 
   /* Main area */
@@ -43,12 +51,36 @@
   /* Top Nav */
   .topnav {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
     gap: 8px;
     padding: 14px 20px;
     padding-top: calc(14px + env(safe-area-inset-top));
     flex-shrink: 0;
+  }
+
+  /* Sidebar toggle button */
+  .btn-sidebar-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: none;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: color 0.15s, background 0.15s, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .btn-sidebar-toggle:hover { color: #fff; background: rgba(255,255,255,0.08); }
+  .btn-sidebar-toggle:active { transform: scale(0.82); }
+
+  .toggle-bar {
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1),
+                opacity 0.2s ease;
+    transform-origin: center;
   }
 
   /* Center Content */
@@ -376,7 +408,15 @@
 <div class="main-area">
 
 <!-- Top Nav -->
-<nav class="topnav"></nav>
+<nav class="topnav">
+  <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" onclick="toggleSidebar(this)" title="사이드바 열기/닫기">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect class="toggle-bar" id="bar1" x="3" y="5" width="14" height="1.8" rx="0.9" fill="currentColor"/>
+      <rect class="toggle-bar" id="bar2" x="3" y="9.1" width="10" height="1.8" rx="0.9" fill="currentColor"/>
+      <rect class="toggle-bar" id="bar3" x="3" y="13.2" width="14" height="1.8" rx="0.9" fill="currentColor"/>
+    </svg>
+  </button>
+</nav>
 
 <!-- Chat view (conversation) -->
 <div class="chat-view" id="chat-view">
@@ -485,6 +525,19 @@ const suggestions = [
   '특정 주제에 대해 더 깊이 탐구하세요',
   '관련 분야의 새로운 아이디어 제안'
 ];
+
+function toggleSidebar(btn) {
+  const frame = document.querySelector('.sidebar-frame');
+  const collapsed = frame.classList.toggle('collapsed');
+  btn.style.transition = 'transform 0s';
+  btn.style.transform = 'scale(0.78)';
+  setTimeout(() => {
+    btn.style.transition = 'transform 0.35s cubic-bezier(0.34,1.72,0.64,1)';
+    btn.style.transform = 'scale(1)';
+  }, 60);
+  const bar2 = document.getElementById('bar2');
+  bar2.style.width = collapsed ? '14px' : '10px';
+}
 
 function bounce(el) {
   el.style.transition = 'transform 0.0s';
