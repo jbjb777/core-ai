@@ -16,10 +16,28 @@
     height: 100vh;
     height: 100dvh;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     color: #fff;
     overflow: hidden;
+  }
+
+  /* Sidebar iframe */
+  .sidebar-frame {
+    width: 260px;
+    min-width: 260px;
+    height: 100%;
+    border: none;
+    flex-shrink: 0;
+  }
+
+  /* Main area */
+  .main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
   }
 
   /* Top Nav */
@@ -31,18 +49,6 @@
     padding: 14px 20px;
     padding-top: calc(14px + env(safe-area-inset-top));
     flex-shrink: 0;
-  }
-
-  .nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .nav-logo-text {
-    font-size: 17px;
-    font-weight: 600;
-    color: #fff;
-    letter-spacing: -0.3px;
   }
 
   /* Center Content */
@@ -365,13 +371,12 @@
 </head>
 <body>
 
+<iframe class="sidebar-frame" src="side.html"></iframe>
+
+<div class="main-area">
+
 <!-- Top Nav -->
-<nav class="topnav">
-  <div class="nav-logo" onclick="goHome()" style="cursor:pointer;">
-    <img src="logo_color.png" width="28" height="28" style="object-fit:contain;" alt="Core logo" />
-    <span class="nav-logo-text">Core</span>
-  </div>
-</nav>
+<nav class="topnav"></nav>
 
 <!-- Chat view (conversation) -->
 <div class="chat-view" id="chat-view">
@@ -379,15 +384,7 @@
 </div>
 
 <!-- Center (hero) -->
-<main class="center hero" id="hero">
-
-  <!-- Logo -->
-  <div class="logo">
-    <img src="logo_white.png" width="52" height="52" style="object-fit:contain;" alt="Core logo" />
-    <span class="logo-text">Core</span>
-  </div>
-
-</main>
+<main class="center hero" id="hero"></main>
 
 <!-- Bottom bar (always visible) -->
 <div class="bottom-bar">
@@ -600,5 +597,30 @@ document.getElementById('chat-input').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') sendMessage();
 });
 </script>
+
+</div><!-- /.main-area -->
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
