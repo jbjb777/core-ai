@@ -2,19 +2,19 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
 <title>Core AI</title>
 <link rel="icon" type="image/svg+xml" href="./logo_icon.png">
-
 
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  html, body { height: 100%; }
+  html { height: 100%; height: 100dvh; }
 
   body {
     background: #000;
     height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -29,6 +29,7 @@
     align-items: center;
     gap: 8px;
     padding: 14px 20px;
+    padding-top: calc(14px + env(safe-area-inset-top));
     flex-shrink: 0;
   }
 
@@ -53,6 +54,7 @@
     justify-content: center;
     gap: 32px;
     padding: 0 24px;
+    min-height: 0;
   }
 
   /* Logo */
@@ -214,6 +216,7 @@
     flex-direction: column;
     flex: 1;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 32px 0 0;
     min-height: 0;
   }
@@ -230,7 +233,7 @@
     gap: 32px;
   }
 
-  /* User bubble (pill, right-ish like screenshot) */
+  /* User bubble */
   .msg-user {
     display: flex;
     justify-content: flex-end;
@@ -324,10 +327,11 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* Bottom input bar (chat mode) */
+  /* Bottom input bar (always visible) */
   .bottom-bar {
     width: 100%;
     padding: 12px 24px 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -460,8 +464,6 @@
       </button>
 
     </div>
-
-
   </div>
 </div>
 
@@ -517,24 +519,21 @@ function sendMessage() {
 
   bounce(sendBtn);
 
-  // Hide hero, show chat
   document.getElementById('hero').classList.add('hidden');
   document.getElementById('chat-view').classList.add('active');
 
   const container = document.getElementById('chat-messages');
 
-  // User bubble
   const userDiv = document.createElement('div');
   userDiv.className = 'msg-user';
   userDiv.innerHTML = `<div class="msg-user-bubble">${escHtml(text)}</div>`;
   container.appendChild(userDiv);
 
   input.value = '';
+  input.blur();
 
-  // Scroll down
   container.scrollTop = container.scrollHeight;
 
-  // AI response after short delay
   setTimeout(() => {
     const ms = Math.floor(Math.random() * 600 + 700);
     const modeLabel = document.getElementById('btn-auto').childNodes[0].textContent.trim();
@@ -599,10 +598,6 @@ document.addEventListener('click', function(e) {
 
 document.getElementById('chat-input').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') sendMessage();
-  if (e.ctrlKey && e.key === 'd') {
-    e.preventDefault();
-    bounce(document.querySelector('.hint-pill'));
-  }
 });
 </script>
 </body>
