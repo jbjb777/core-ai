@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+<title>이용약관 – Core</title>
+<link rel="icon" type="image/svg+xml" href="./logo_icon.png">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { height: 100%; height: 100dvh; }
+
+  body {
+    background: #000;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: row;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #fff;
+    overflow: hidden;
+  }
+
+  .sidebar-dim { display: none; }
+
+  .sidebar-frame {
+    width: 260px;
+    min-width: 0;
+    height: 100%;
+    border: none;
+    flex-shrink: 0;
+    transition: width 0.32s cubic-bezier(0.4,0,0.2,1),
+                opacity 0.28s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+    opacity: 1;
+  }
+  .sidebar-frame.collapsed { width: 0; opacity: 0; }
+
+  .main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .topnav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px;
+    padding-top: calc(14px + env(safe-area-inset-top));
+    flex-shrink: 0;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .btn-sidebar-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: none;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: color 0.15s, background 0.15s, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .btn-sidebar-toggle:hover { color: #fff; background: rgba(255,255,255,0.08); }
+  .btn-sidebar-toggle:active { transform: scale(0.82); }
+
+  .toggle-bar { transition: width 0.28s cubic-bezier(0.4,0,0.2,1); }
+
+  .topnav-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #888;
+    letter-spacing: -0.2px;
+  }
+
+  .content-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 48px 0 80px;
+  }
+
+  .content-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  .page-header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid #1e1e1e;
+  }
+
+  .page-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 12px;
+  }
+
+  .page-title {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.8px;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+
+  .page-desc {
+    font-size: 15px;
+    color: #666;
+    line-height: 1.7;
+  }
+
+  .section {
+    margin-bottom: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid #141414;
+  }
+  .section:last-child { border-bottom: none; margin-bottom: 0; }
+
+  .section-num {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.3px;
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+
+  .section-body {
+    font-size: 14px;
+    color: #888;
+    line-height: 1.8;
+  }
+
+  .section-body p { margin-bottom: 12px; }
+  .section-body p:last-child { margin-bottom: 0; }
+
+  .item-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .item-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: #888;
+    line-height: 1.7;
+  }
+
+  .item-list li::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #333;
+    flex-shrink: 0;
+    margin-top: 9px;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar-frame {
+      position: fixed;
+      top: 0; left: 0;
+      width: 260px;
+      height: 100%; height: 100dvh;
+      z-index: 200;
+      transition: transform 0.32s cubic-bezier(0.4,0,0.2,1),
+                  opacity 0.28s cubic-bezier(0.4,0,0.2,1);
+      transform: translateX(0);
+      opacity: 1;
+    }
+    .sidebar-frame.collapsed {
+      transform: translateX(-100%);
+      width: 260px;
+      opacity: 0;
+    }
+    .sidebar-dim {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 199;
+      opacity: 1;
+      transition: opacity 0.28s ease;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+    .sidebar-dim.hidden { opacity: 0; pointer-events: none; }
+    .content-inner { padding: 0 20px; }
+    .page-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-dim hidden" id="sidebar-dim" onclick="closeSidebarMobile()"></div>
+<iframe class="sidebar-frame" id="sidebar-frame" src="side.html"></iframe>
+
+<div class="main-area">
+
+  <nav class="topnav">
+    <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" onclick="toggleSidebar(this)" title="사이드바 열기/닫기">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <rect class="toggle-bar" id="bar1" x="3" y="5" width="14" height="1.8" rx="0.9" fill="currentColor"/>
+        <rect class="toggle-bar" id="bar2" x="3" y="9.1" width="10" height="1.8" rx="0.9" fill="currentColor"/>
+        <rect class="toggle-bar" id="bar3" x="3" y="13.2" width="14" height="1.8" rx="0.9" fill="currentColor"/>
+      </svg>
+    </button>
+    <span class="topnav-title">이용약관</span>
+  </nav>
+
+  <div class="content-scroll">
+    <div class="content-inner">
+
+      <div class="page-header">
+        <div class="page-label">Legal</div>
+        <h1 class="page-title">이용약관</h1>
+        <p class="page-desc">
+          본 이용약관은 Core AI (이하 "서비스")가 제공하는 인공지능(AI) 서비스 이용과 관련하여
+          이용자와 서비스 간의 권리, 의무 및 책임사항을 규정합니다.
+        </p>
+      </div>
+
+      <div class="section">
+        <div class="section-num">01</div>
+        <h2 class="section-title">목적</h2>
+        <div class="section-body">
+          <p>이 약관은 이용자가 서비스를 올바르게 이용할 수 있도록 기본적인 기준을 정하는 것을 목적으로 합니다.</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-num">02</div>
+        <h2 class="section-title">서비스 소개</h2>
+        <div class="section-body">
+          <ul class="item-list">
+            <li>본 서비스는 회원가입 없이 누구나 이용 가능한 인공지능(AI) 서비스입니다.</li>
+            <li>이용자는 별도의 계정 생성 없이 AI와 대화 및 기능을 사용할 수 있습니다.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-num">03</div>
+        <h2 class="section-title">이용자의 의무</h2>
+        <div class="section-body">
+          <p>이용자는 서비스를 이용하면서 다음 행위를 해서는 안 됩니다.</p>
+          <ul class="item-list">
+            <li>욕설, 비하, 혐오 표현 등 부적절한 언어 사용</li>
+            <li>타인을 괴롭히거나 불쾌감을 주는 내용 입력</li>
+            <li>불법적인 내용 또는 법령을 위반하는 정보 요청 및 생성</li>
+            <li>AI를 악용하여 허위 정보, 스팸, 사기 등을 시도하는 행위</li>
+            <li>서비스의 정상적인 운영을 방해하는 행위</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-num">04</div>
+        <h2 class="section-title">서비스 이용 제한</h2>
+        <div class="section-body">
+          <ul class="item-list">
+            <li>이용자가 본 약관을 위반할 경우 서비스는 별도의 경고 없이 이용을 제한할 수 있습니다.</li>
+            <li>반복적인 위반 시 서비스 접근이 차단될 수 있습니다.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-num">05</div>
+        <h2 class="section-title">서비스의 책임 제한</h2>
+        <div class="section-body">
+          <ul class="item-list">
+            <li>서비스는 AI의 특성상 항상 정확한 정보를 제공하지 않을 수 있습니다.</li>
+            <li>이용자는 중요한 판단(의료, 법률, 금융 등)에 대해 전문가의 조언을 따르는 것이 권장됩니다.</li>
+            <li>서비스 이용으로 발생한 문제에 대해 서비스는 법적 책임을 제한합니다.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-num">06</div>
+        <h2 class="section-title">서비스 변경 및 중단</h2>
+        <div class="section-body">
+          <ul class="item-list">
+            <li>서비스는 필요에 따라 기능을 변경하거나 일시적으로 중단할 수 있습니다.</li>
+            <li>사전 공지가 어려운 경우 사후 공지될 수 있습니다.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-num">07</div>
+        <h2 class="section-title">지식재산권</h2>
+        <div class="section-body">
+          <ul class="item-list">
+            <li>서비스 및 AI 모델에 대한 권리는 서비스 제공자에게 있습니다.</li>
+            <li>이용자가 입력한 내용 및 생성된 결과는 서비스 개선을 위해 활용될 수 있습니다.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+const isMobile = () => window.innerWidth <= 768;
+
+function setSidebarState(open) {
+  const frame = document.getElementById('sidebar-frame');
+  const dim = document.getElementById('sidebar-dim');
+  const bar2 = document.getElementById('bar2');
+  if (open) {
+    frame.classList.remove('collapsed');
+    if (isMobile()) dim.classList.remove('hidden');
+  } else {
+    frame.classList.add('collapsed');
+    dim.classList.add('hidden');
+  }
+  bar2.style.width = open ? '10px' : '14px';
+}
+
+function toggleSidebar(btn) {
+  const frame = document.getElementById('sidebar-frame');
+  setSidebarState(frame.classList.contains('collapsed'));
+  btn.style.transition = 'transform 0s';
+  btn.style.transform = 'scale(0.78)';
+  setTimeout(() => {
+    btn.style.transition = 'transform 0.35s cubic-bezier(0.34,1.72,0.64,1)';
+    btn.style.transform = 'scale(1)';
+  }, 60);
+}
+
+function closeSidebarMobile() { setSidebarState(false); }
+
+window.addEventListener('DOMContentLoaded', () => setSidebarState(!isMobile()));
+
+window.addEventListener('resize', () => {
+  const dim = document.getElementById('sidebar-dim');
+  const frame = document.getElementById('sidebar-frame');
+  if (!isMobile()) dim.classList.add('hidden');
+  else if (!frame.classList.contains('collapsed')) dim.classList.remove('hidden');
+});
+</script>
+</body>
+</html>
