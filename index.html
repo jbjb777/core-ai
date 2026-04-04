@@ -754,13 +754,11 @@ async function sendMessage(retryText) {
       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>`;
 
-    const capturedPrompt = text;
-
     aiDiv.innerHTML = `
-      <div class="msg-ai-text">${escHtml(resultText)}</div>
+      <div class="msg-ai-text"></div>
       <div class="msg-actions">
-        <button class="action-btn" title="다시 시도" onclick="retryMessage(this, ${JSON.stringify(capturedPrompt)})">${retrySVG}</button>
-        <button class="action-btn" title="복사" onclick="copyText(this, ${JSON.stringify(resultText)})">${copySVG}</button>
+        <button class="action-btn btn-retry" title="다시 시도">${retrySVG}</button>
+        <button class="action-btn btn-copy" title="복사">${copySVG}</button>
         <span class="action-meta">
           <span>${elapsed}ms</span>
           <span>${modeLabel}</span>
@@ -770,6 +768,11 @@ async function sendMessage(retryText) {
         `<button class="suggestion-item" onclick="bounce(this)"><span class="suggestion-arrow">↳</span>${s}</button>`
       ).join('')}</div>
     `;
+    aiDiv.querySelector('.msg-ai-text').textContent = resultText;
+    aiDiv.querySelector('.btn-retry')._promptText = text;
+    aiDiv.querySelector('.btn-copy')._resultText = resultText;
+    aiDiv.querySelector('.btn-retry').addEventListener('click', function() { retryMessage(this); });
+    aiDiv.querySelector('.btn-copy').addEventListener('click', function() { copyText(this); });
 
   } catch (err) {
     aiDiv.innerHTML = `
@@ -787,13 +790,15 @@ async function sendMessage(retryText) {
 }
 
 // 다시 시도: 해당 AI 응답 블록을 로딩으로 교체 후 재요청
-async function retryMessage(btn, promptText) {
+async function retryMessage(btn) {
   if (isWaiting) return;
   bounce(btn);
 
-  // 이 버튼이 속한 msg-ai 블록 찾기
   const aiDiv = btn.closest('.msg-ai');
   if (!aiDiv) return;
+
+  const promptText = btn._promptText;
+  if (!promptText) return;
 
   isWaiting = true;
   const sendBtn = document.getElementById('btn-send');
@@ -849,10 +854,10 @@ async function retryMessage(btn, promptText) {
     </svg>`;
 
     aiDiv.innerHTML = `
-      <div class="msg-ai-text">${escHtml(resultText)}</div>
+      <div class="msg-ai-text"></div>
       <div class="msg-actions">
-        <button class="action-btn" title="다시 시도" onclick="retryMessage(this, ${JSON.stringify(promptText)})">${retrySVG}</button>
-        <button class="action-btn" title="복사" onclick="copyText(this, ${JSON.stringify(resultText)})">${copySVG}</button>
+        <button class="action-btn btn-retry" title="다시 시도">${retrySVG}</button>
+        <button class="action-btn btn-copy" title="복사">${copySVG}</button>
         <span class="action-meta">
           <span>${elapsed}ms</span>
           <span>${modeLabel}</span>
@@ -862,6 +867,11 @@ async function retryMessage(btn, promptText) {
         `<button class="suggestion-item" onclick="bounce(this)"><span class="suggestion-arrow">↳</span>${s}</button>`
       ).join('')}</div>
     `;
+    aiDiv.querySelector('.msg-ai-text').textContent = resultText;
+    aiDiv.querySelector('.btn-retry')._promptText = promptText;
+    aiDiv.querySelector('.btn-copy')._resultText = resultText;
+    aiDiv.querySelector('.btn-retry').addEventListener('click', function() { retryMessage(this); });
+    aiDiv.querySelector('.btn-copy').addEventListener('click', function() { copyText(this); });
 
   } catch (err) {
     aiDiv.innerHTML = `
@@ -879,12 +889,16 @@ async function retryMessage(btn, promptText) {
 }
 
 // 복사 버튼
-function copyText(btn, text) {
+function copyText(btn) {
+  const text = btn._resultText || '';
+  const copySVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+    <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
   navigator.clipboard.writeText(text).then(() => {
     bounce(btn);
-    const orig = btn.innerHTML;
     btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><polyline points="20,6 9,17 4,12" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    setTimeout(() => { btn.innerHTML = orig; }, 1500);
+    setTimeout(() => { btn.innerHTML = copySVG; }, 1000);
   });
 }
 
